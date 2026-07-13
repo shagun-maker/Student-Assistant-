@@ -14,3 +14,5 @@ client = MongoClient(MONGO_URI)
 db = client["StudentDB"]
 
 students = db["students"]
+
+interviews = db["interviews"]
