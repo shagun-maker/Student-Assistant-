@@ -2,9 +2,11 @@ import "./style.css";
 import { Conversation } from "@elevenlabs/client";
 
 let conversation = null;
+let lastMessage = "";
 
 document.querySelector("#app").innerHTML = `
 <div>
+
     <h1>Student AI Interview</h1>
 
     <input id="name" placeholder="Student Name"/>
@@ -18,6 +20,13 @@ document.querySelector("#app").innerHTML = `
     </button>
 
     <p id="status"></p>
+
+    <hr>
+
+    <h2>Conversation</h2>
+
+    <div id="transcript"></div>
+
 </div>
 `;
 
@@ -31,6 +40,35 @@ document
     .getElementById("stopBtn")
     .addEventListener("click", stopInterview);
 
+function addMessage(sender, text) {
+
+    if (!text) return;
+
+    text = text.trim();
+
+    if (text === "" || text === "...") return;
+
+    // Prevent duplicate consecutive messages
+    if (text === lastMessage) return;
+
+    lastMessage = text;
+
+    const transcript = document.getElementById("transcript");
+
+    const div = document.createElement("div");
+
+    div.className = sender;
+
+    div.innerHTML = `
+        <strong>${sender === "ai" ? "AI" : "You"}:</strong>
+        ${text}
+    `;
+
+    transcript.appendChild(div);
+
+    transcript.scrollTop = transcript.scrollHeight;
+}
+
 async function startInterview() {
 
     try {
@@ -38,9 +76,15 @@ async function startInterview() {
         const studentName = document.getElementById("name").value;
 
         if (!studentName) {
+
             alert("Please enter student name.");
+
             return;
+
         }
+
+        lastMessage = "";
+        document.getElementById("transcript").innerHTML = "";
 
         document.getElementById("startBtn").disabled = true;
         document.getElementById("stopBtn").disabled = false;
@@ -67,17 +111,44 @@ async function startInterview() {
 
             onConnect() {
 
+                console.log("Connected");
+
                 status.innerText = "Interview Started";
 
-                console.log("Connected");
+            },
+
+            onMessage(message) {
+
+                console.log("========== MESSAGE RECEIVED ==========");
+                console.log(message);
+
+                if (!message.message) return;
+
+                const text = message.message.trim();
+
+                if (text === "" || text === "...") return;
+
+                // AI message
+                if (message.source === "ai" || message.role === "agent") {
+
+                    addMessage("ai", text);
+
+                }
+
+                // User message
+                else if (message.source === "user" || message.role === "user") {
+
+                    addMessage("user", text);
+
+                }
 
             },
 
             onDisconnect() {
 
-                status.innerText = "Interview Ended";
-
                 console.log("Disconnected");
+
+                status.innerText = "Interview Ended";
 
                 document.getElementById("startBtn").disabled = false;
                 document.getElementById("stopBtn").disabled = true;
@@ -86,9 +157,9 @@ async function startInterview() {
 
             onError(error) {
 
-                status.innerText = "Error";
-
                 console.error(error);
+
+                status.innerText = "Error";
 
                 document.getElementById("startBtn").disabled = false;
                 document.getElementById("stopBtn").disabled = true;
@@ -122,8 +193,6 @@ async function stopInterview(){
 
             conversation = null;
 
-            status.innerText = "Interview Stopped";
-
         }
 
     }
@@ -133,6 +202,8 @@ async function stopInterview(){
         console.error(err);
 
     }
+
+    status.innerText = "Interview Stopped";
 
     document.getElementById("startBtn").disabled = false;
 
