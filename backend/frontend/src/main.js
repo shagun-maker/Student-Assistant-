@@ -97,6 +97,8 @@ async function startInterview() {
 
         const data = await response.json();
 
+        console.log("Signed URL Response:", data);
+
         status.innerText = "Requesting microphone...";
 
         await navigator.mediaDevices.getUserMedia({
@@ -111,7 +113,7 @@ async function startInterview() {
 
             onConnect() {
 
-                console.log("Connected");
+                console.log("========== CONNECTED ==========");
 
                 status.innerText = "Interview Started";
 
@@ -128,14 +130,12 @@ async function startInterview() {
 
                 if (text === "" || text === "...") return;
 
-                // AI message
                 if (message.source === "ai" || message.role === "agent") {
 
                     addMessage("ai", text);
 
                 }
 
-                // User message
                 else if (message.source === "user" || message.role === "user") {
 
                     addMessage("user", text);
@@ -144,9 +144,10 @@ async function startInterview() {
 
             },
 
-            onDisconnect() {
+            onDisconnect(event) {
 
-                console.log("Disconnected");
+                console.log("========== DISCONNECTED ==========");
+                console.log(event);
 
                 status.innerText = "Interview Ended";
 
@@ -157,7 +158,8 @@ async function startInterview() {
 
             onError(error) {
 
-                console.error(error);
+                console.log("========== ERROR ==========");
+                console.log(error);
 
                 status.innerText = "Error";
 
@@ -170,8 +172,9 @@ async function startInterview() {
 
     }
 
-    catch(err){
+    catch (err) {
 
+        console.log("========== CATCH ERROR ==========");
         console.error(err);
 
         status.innerText = err.message;
@@ -183,11 +186,13 @@ async function startInterview() {
 
 }
 
-async function stopInterview(){
+async function stopInterview() {
 
-    try{
+    try {
 
-        if(conversation){
+        if (conversation) {
+
+            console.log("========== STOP BUTTON CLICKED ==========");
 
             await conversation.endSession();
 
@@ -197,7 +202,7 @@ async function stopInterview(){
 
     }
 
-    catch(err){
+    catch (err) {
 
         console.error(err);
 

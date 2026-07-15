@@ -31,10 +31,12 @@ def get_elevenlabs_client():
 def start_agent_interview(user_message: str):
     client, agent_id = get_elevenlabs_client()
     request_options = RequestOptions(timeout=15)
+
     agent = client.conversational_ai.agents.get(
         agent_id=agent_id,
         request_options=request_options,
     )
+
     return {
         "status": "ready",
         "message": "ElevenLabs agent is connected",
@@ -59,25 +61,47 @@ def home():
 
 @app.route("/start-interview", methods=["GET", "POST"])
 def interview():
+
     payload = request.get_json(silent=True) or {}
-    user_message = payload.get("message") or payload.get("prompt") or "Please introduce yourself and start the interview."
+
+    user_message = (
+        payload.get("message")
+        or payload.get("prompt")
+        or "Please introduce yourself and start the interview."
+    )
 
     try:
+
         response = start_agent_interview(user_message)
-        response_payload = response if isinstance(response, dict) else (response.model_dump() if hasattr(response, "model_dump") else str(response))
+
+        response_payload = (
+            response
+            if isinstance(response, dict)
+            else (
+                response.model_dump()
+                if hasattr(response, "model_dump")
+                else str(response)
+            )
+        )
+
         _, agent_id = get_config()
+
         return jsonify({
             "status": "success",
             "message": "Interview started with the ElevenLabs agent",
             "agent_id": agent_id,
             "response": response_payload,
         })
+
     except Exception as exc:
+
         return jsonify({
             "status": "error",
             "message": "Could not start the ElevenLabs agent",
             "details": str(exc),
         }), 502
+
+
 @app.route("/get-signed-url", methods=["GET"])
 def get_signed_url():
 
@@ -103,6 +127,7 @@ def get_signed_url():
         )
 
         if response.status_code != 200:
+
             return jsonify({
                 "status": "error",
                 "details": response.text
@@ -111,14 +136,49 @@ def get_signed_url():
         return jsonify(response.json())
 
     except Exception as e:
+
         return jsonify({
             "status": "error",
             "message": str(e)
         }), 500
 
 
+# ==========================================================
+# NEW API
+# ==========================================================
+
+@app.route("/save-interview", methods=["POST"])
+def save_interview():
+
+    data = request.get_json()
+
+    print("\n========== Interview Received ==========")
+    print(data)
+    print("========================================\n")
+
+    return jsonify({
+        "status": "success",
+        "message": "Interview received successfully"
+    })
+
+
+# ==========================================================
 
 if __name__ == "__main__":
-    debug_mode = os.getenv("FLASK_DEBUG", "0").lower() in {"1", "true", "yes", "on"}
-    app.run(debug=debug_mode, use_reloader=False, host="0.0.0.0", port=5000)
 
+    debug_mode = os.getenv(
+        "FLASK_DEBUG",
+        "0"
+    ).lower() in {
+        "1",
+        "true",
+        "yes",
+        "on"
+    }
+
+    app.run(
+        debug=debug_mode,
+        use_reloader=False,
+        host="0.0.0.0",
+        port=5000
+    )
