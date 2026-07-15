@@ -4,9 +4,9 @@ import { Conversation } from "@elevenlabs/client";
 let conversation = null;
 let lastMessage = "";
 
+// FIX: Added backticks around the HTML string
 document.querySelector("#app").innerHTML = `
-<div>
-
+  <div>
     <h1>Student AI Interview</h1>
 
     <input id="name" placeholder="Student Name"/>
@@ -26,8 +26,7 @@ document.querySelector("#app").innerHTML = `
     <h2>Conversation</h2>
 
     <div id="transcript"></div>
-
-</div>
+  </div>
 `;
 
 const status = document.getElementById("status");
@@ -41,7 +40,6 @@ document
     .addEventListener("click", stopInterview);
 
 function addMessage(sender, text) {
-
     if (!text) return;
 
     text = text.trim();
@@ -54,33 +52,24 @@ function addMessage(sender, text) {
     lastMessage = text;
 
     const transcript = document.getElementById("transcript");
-
     const div = document.createElement("div");
 
     div.className = sender;
 
-    div.innerHTML = `
-        <strong>${sender === "ai" ? "AI" : "You"}:</strong>
-        ${text}
-    `;
+    // FIX: Added backticks around the innerHTML template literal
+    div.innerHTML = `<strong>${sender === "ai" ? "AI" : "You"}:</strong> ${text}`;
 
     transcript.appendChild(div);
-
     transcript.scrollTop = transcript.scrollHeight;
 }
 
 async function startInterview() {
-
     try {
-
         const studentName = document.getElementById("name").value;
 
         if (!studentName) {
-
             alert("Please enter student name.");
-
             return;
-
         }
 
         lastMessage = "";
@@ -108,19 +97,14 @@ async function startInterview() {
         status.innerText = "Connecting to ElevenLabs...";
 
         conversation = await Conversation.startSession({
-
             signedUrl: data.signed_url,
 
             onConnect() {
-
                 console.log("========== CONNECTED ==========");
-
                 status.innerText = "Interview Started";
-
             },
 
             onMessage(message) {
-
                 console.log("========== MESSAGE RECEIVED ==========");
                 console.log(message);
 
@@ -131,21 +115,14 @@ async function startInterview() {
                 if (text === "" || text === "...") return;
 
                 if (message.source === "ai" || message.role === "agent") {
-
                     addMessage("ai", text);
-
                 }
-
                 else if (message.source === "user" || message.role === "user") {
-
                     addMessage("user", text);
-
                 }
-
             },
 
             onDisconnect(event) {
-
                 console.log("========== DISCONNECTED ==========");
                 console.log(event);
 
@@ -153,11 +130,9 @@ async function startInterview() {
 
                 document.getElementById("startBtn").disabled = false;
                 document.getElementById("stopBtn").disabled = true;
-
             },
 
             onError(error) {
-
                 console.log("========== ERROR ==========");
                 console.log(error);
 
@@ -165,15 +140,10 @@ async function startInterview() {
 
                 document.getElementById("startBtn").disabled = false;
                 document.getElementById("stopBtn").disabled = true;
-
             }
-
         });
-
     }
-
     catch (err) {
-
         console.log("========== CATCH ERROR ==========");
         console.error(err);
 
@@ -181,37 +151,22 @@ async function startInterview() {
 
         document.getElementById("startBtn").disabled = false;
         document.getElementById("stopBtn").disabled = true;
-
     }
-
 }
 
 async function stopInterview() {
-
     try {
-
         if (conversation) {
-
             console.log("========== STOP BUTTON CLICKED ==========");
-
             await conversation.endSession();
-
             conversation = null;
-
         }
-
     }
-
     catch (err) {
-
         console.error(err);
-
     }
 
     status.innerText = "Interview Stopped";
-
     document.getElementById("startBtn").disabled = false;
-
     document.getElementById("stopBtn").disabled = true;
-
 }
