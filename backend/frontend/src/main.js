@@ -7,14 +7,14 @@ import Vapi from "@vapi-ai/web";
 let conversation = null;
 
 let lastMessage = "";
-const vapi = new Vapi.default("4dc0dbc6-8b1b-439b-8a13-21651273480c");
-const VAPI_ASSISTANT_ID = "27d6af1e-1d26-4cd1-9b43-fe003428b57e";
+const vapi = new Vapi.default("4dc0dbc6-8b1b-439b-8a13-21651273480c"); // step 1 of connecting to vapi
+const VAPI_ASSISTANT_ID = "27d6af1e-1d26-4cd1-9b43-fe003428b57e"; //step 2 of connecting to vapi
 
 // FIX: Added backticks around the HTML string
 document.querySelector("#app").innerHTML = `
 <div>
 
-    <h1>Student AI Interview</h1>
+    <h1>Student Interview</h1>
 
     <input id="name" placeholder="Student Name"/>
 
@@ -24,7 +24,7 @@ document.querySelector("#app").innerHTML = `
             <input
                 type="radio"
                 name="provider"
-                value="elevenlabs"
+                value="ELEVENLABS"
                 checked
             />
             ElevenLabs
@@ -34,7 +34,7 @@ document.querySelector("#app").innerHTML = `
             <input
                 type="radio"
                 name="provider"
-                value="vapi"
+                value="VAPI"
             />
             Vapi
         </label>
@@ -42,11 +42,11 @@ document.querySelector("#app").innerHTML = `
     </div>
 
     <button id="startBtn">
-        Start Interview
+        START
     </button>
 
     <button id="stopBtn" disabled>
-        Stop Interview
+        STOP
     </button>
 
     <p id="status"></p>
@@ -134,24 +134,24 @@ async function startInterview() {
 
             status.innerText = "Connecting to Vapi...";
 
-            await vapi.start(VAPI_ASSISTANT_ID);
+            await vapi.start(VAPI_ASSISTANT_ID);// step 3 , all of connecting microphone and start session with vapi
 
             status.innerText = "Interview Started";
 
             // AI messages
-            vapi.on("message", (message) => {
+            vapi.on("message", (message) => {  // step 4, listen to messages from vapi
 
                 console.log("Vapi Message:", message);
 
                 if (!message) return;
 
                 // AI response
-                if (message.type === "transcript" && message.role === "assistant") {
+                if (message.type === "transcript" && message.role === "assistant") { //step 5, check if the message is from the AI assistant
                     addMessage("ai", message.transcript);
                 }
 
                 // User speech
-                if (message.type === "transcript" && message.role === "user") {
+                if (message.type === "transcript" && message.role === "user") {   // step 6, check if the message is from the user
                     addMessage("user", message.transcript);
                 }
 
