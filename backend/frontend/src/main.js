@@ -1,17 +1,17 @@
-import "./style.css";
+import "./style.css"; 
 import { Conversation } from "@elevenlabs/client";
 import Vapi from "@vapi-ai/web";
 
 
 
-let conversation = null;
+let conversation = null;// This will hold the current conversation session
 
-let lastMessage = "";
+let lastMessage = ""; // This will hold the last message to prevent duplicates
 const vapi = new Vapi.default("4dc0dbc6-8b1b-439b-8a13-21651273480c"); // step 1 of connecting to vapi
 const VAPI_ASSISTANT_ID = "27d6af1e-1d26-4cd1-9b43-fe003428b57e"; //step 2 of connecting to vapi
 
 // FIX: Added backticks around the HTML string
-document.querySelector("#app").innerHTML = `
+document.querySelector("#app").innerHTML = ` 
 <div>
 
     <h1>Student Interview</h1>
@@ -24,7 +24,7 @@ document.querySelector("#app").innerHTML = `
             <input
                 type="radio"
                 name="provider"
-                value="ELEVENLABS"
+                value="elevenlabs"
                 checked
             />
             ElevenLabs
@@ -34,7 +34,7 @@ document.querySelector("#app").innerHTML = `
             <input
                 type="radio"
                 name="provider"
-                value="VAPI"
+                value="vapi"
             />
             Vapi
         </label>
@@ -60,29 +60,29 @@ document.querySelector("#app").innerHTML = `
 </div>
 `;
 
-const status = document.getElementById("status");
+const status = document.getElementById("status"); // This will display the current status of the interview
 
-document
-    .getElementById("startBtn")
-    .addEventListener("click", startInterview);
+document 
+    .getElementById("startBtn") 
+    .addEventListener("click", startInterview);  // Add event listener for the start button
 
 document
     .getElementById("stopBtn")
-    .addEventListener("click", stopInterview);
+    .addEventListener("click", stopInterview); // Add event listener for the stop button
 
-function addMessage(sender, text) {
-    if (!text) return;
+function addMessage(sender, text) { // This function adds a message to the transcript
+    if (!text) return; // If the text is empty, do nothing
 
-    text = text.trim();
+    text = text.trim(); // Trim whitespace from the text
 
-    if (text === "" || text === "...") return;
+    if (text === "" || text === "...") return;     // If the text is empty or just ellipsis, do nothing
 
     // Prevent duplicate consecutive messages
-    if (text === lastMessage) return;
+    if (text === lastMessage) return;  // If the text is the same as the last message, do nothing
 
-    lastMessage = text;
+    lastMessage = text; // Update the last message to the current text
 
-    const transcript = document.getElementById("transcript");
+    const transcript = document.getElementById("transcript"); // Get the transcript element where messages will be displayed
     const div = document.createElement("div");
 
     div.className = sender;
@@ -97,11 +97,11 @@ function addMessage(sender, text) {
 async function startInterview() {
     try {
         const studentName = document.getElementById("name").value;
-        const provider = document.querySelector(
-            'input[name="provider"]:checked'
+        const provider = document.querySelector(  
+            'input[name="provider"]:checked' 
         ).value;
 
-        console.log("Selected Provider:", provider);
+        console.log("Selected Provider:", provider); // Log the selected provider to the console
 
         if (!studentName) {
             alert("Please enter student name.");
@@ -146,12 +146,20 @@ async function startInterview() {
                 if (!message) return;
 
                 // AI response
-                if (message.type === "transcript" && message.role === "assistant") { //step 5, check if the message is from the AI assistant
+                if (
+                    message.type === "transcript" &&
+                    message.role === "assistant" &&
+                    message.transcriptType === "final"
+                ) {
                     addMessage("ai", message.transcript);
                 }
 
                 // User speech
-                if (message.type === "transcript" && message.role === "user") {   // step 6, check if the message is from the user
+                if (
+                    message.type === "transcript" &&
+                    message.role === "user" &&
+                    message.transcriptType === "final"
+                ) {
                     addMessage("user", message.transcript);
                 }
 
