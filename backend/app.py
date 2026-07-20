@@ -5,6 +5,7 @@ from flask import Flask, jsonify, request
 from dotenv import load_dotenv
 from elevenlabs.client import ElevenLabs
 from elevenlabs.core import RequestOptions
+from mongodb import interviews
 
 dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env"))
 load_dotenv(dotenv_path=dotenv_path)
@@ -150,16 +151,37 @@ def get_signed_url():
 @app.route("/save-interview", methods=["POST"])
 def save_interview():
 
-    data = request.get_json()
+    try:
 
-    print("\n========== Interview Received ==========")
-    print(data)
-    print("========================================\n")
+        data = request.get_json()
 
-    return jsonify({
-        "status": "success",
-        "message": "Interview received successfully"
-    })
+        interviews.insert_one({
+
+            "student_name": data.get("student_name"),
+
+            "sender": data.get("sender"),
+
+            "text": data.get("text")
+
+        })
+
+        return jsonify({
+
+            "status": "success",
+
+            "message": "Transcript saved successfully"
+
+        })
+
+    except Exception as e:
+
+        return jsonify({
+
+            "status": "error",
+
+            "message": str(e)
+
+        }), 500
 
 
 # ==========================================================
