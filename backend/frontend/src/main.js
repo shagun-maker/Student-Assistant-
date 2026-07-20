@@ -14,7 +14,7 @@ const VAPI_ASSISTANT_ID = "27d6af1e-1d26-4cd1-9b43-fe003428b57e"; //step 2 of co
 document.querySelector("#app").innerHTML = ` 
 <div>
 
-    <h1>Student Interview</h1>
+    <h1 style="color: hotpink;">Student Interview</h1>
 
     <input id="name" placeholder="Student Name"/>
 
@@ -62,6 +62,7 @@ document.querySelector("#app").innerHTML = `
 
 const status = document.getElementById("status"); // This will display the current status of the interview
 
+
 document 
     .getElementById("startBtn") 
     .addEventListener("click", startInterview);  // Add event listener for the start button
@@ -70,28 +71,67 @@ document
     .getElementById("stopBtn")
     .addEventListener("click", stopInterview); // Add event listener for the stop button
 
-function addMessage(sender, text) { // This function adds a message to the transcript
-    if (!text) return; // If the text is empty, do nothing
+function addMessage(sender, text) {
 
-    text = text.trim(); // Trim whitespace from the text
+    if (!text) return;
 
-    if (text === "" || text === "...") return;     // If the text is empty or just ellipsis, do nothing
+    text = text.trim();
 
-    // Prevent duplicate consecutive messages
-    if (text === lastMessage) return;  // If the text is the same as the last message, do nothing
+    if (text === "" || text === "...") return;
 
-    lastMessage = text; // Update the last message to the current text
+    if (text === lastMessage) return;
 
-    const transcript = document.getElementById("transcript"); // Get the transcript element where messages will be displayed
+    lastMessage = text;
+
+    const transcript = document.getElementById("transcript");
+
     const div = document.createElement("div");
 
     div.className = sender;
 
-    // FIX: Added backticks around the innerHTML template literal
     div.innerHTML = `<strong>${sender === "ai" ? "AI" : "You"}:</strong> ${text}`;
 
     transcript.appendChild(div);
+
     transcript.scrollTop = transcript.scrollHeight;
+
+    // ==============================
+    // SAVE MESSAGE TO MONGODB
+    // ==============================
+
+    const studentName = document.getElementById("name").value;
+
+    fetch("http://127.0.0.1:5000/save-interview", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+
+            student_name: studentName,
+
+            sender: sender === "ai" ? "AI" : "User",
+
+            text: text
+
+        })
+
+    })
+        .then(response => response.json())
+        .then(data => {
+
+            console.log("Transcript Saved:", data);
+
+        })
+        .catch(error => {
+
+            console.error("MongoDB Error:", error);
+
+        });
+
 }
 
 async function startInterview() {
